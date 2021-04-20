@@ -1,8 +1,10 @@
 import random
+from typing import Callable
+
 from Game.Users.UsersClasses import get_players
 
 
-def check_players_hp(players: dict):
+def check_players_hp(players: dict) -> bool:
     """Функция проверки здоровья участников"""
     for player in players.values():
         if player.get_health() == 0:
@@ -11,7 +13,7 @@ def check_players_hp(players: dict):
     return True
 
 
-def get_heading(func):
+def get_heading(func: Callable) -> Callable:
     """Вывод заголовка программы"""
     creator = 'Poddubnjak Daniil'
     print(f"""{'='*30}
@@ -24,7 +26,7 @@ For LightIt Academy.
 
 
 @get_heading
-def simulate_game():
+def simulate_game() -> None:
     """Функция симуляции игры"""
     players = get_players()
     step = 1
