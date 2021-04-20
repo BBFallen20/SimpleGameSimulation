@@ -1,6 +1,5 @@
 import random
 from typing import Callable
-
 from Game.Users.UsersClasses import get_players
 
 
