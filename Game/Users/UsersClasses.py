@@ -1,11 +1,14 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 import random
+from typing import Union
+
 from Game.Users.settings import *
 
 
 class PlayerAbstract(ABC):
     """Абстрактный класс участника"""
+
     @abstractmethod
     def get_damage(self, damage: int) -> NotImplementedError:
         """Метод получения урона"""
@@ -22,7 +25,7 @@ class PlayerAbstract(ABC):
         raise NotImplementedError('Method get_health not implemented!')
 
     @abstractmethod
-    def choose_opponent(self, opponent: PC or Player) -> NotImplementedError:
+    def choose_opponent(self, opponent: Union[PC, Player]) -> NotImplementedError:
         """Метод определения оппонента"""
         raise NotImplementedError('Method choose opponent not implemented!')
 
@@ -44,22 +47,22 @@ class PlayerAbstract(ABC):
 
 class PlayerDefault(PlayerAbstract):
     """Стандартный класс участника"""
-    health = default_health
+    _health = default_health
     opponent = None
 
     def get_damage(self, damage: int) -> None:
         """Метод получения урона"""
-        self.health -= damage
+        self._health -= damage
 
     def get_health(self) -> int:
         """Метод вывода уровня здоровья"""
         # Предусмотрено избегание отрицательных значений здоровья(если здоровье меньше 0 - вернет 0 в любом случае)
-        if self.health < 0 and off_negative:
-            self.health = 0
-        print(f"{self.__str__()} has {self.health}hp.")
-        return self.health
+        if self._health < 0 and off_negative:
+            self._health = 0
+        print(f"{self.__str__()} has {self._health}hp.")
+        return self._health
 
-    def choose_opponent(self, opponent: PC or Player) -> None:
+    def choose_opponent(self, opponent: Union[PC, Player]) -> None:
         """Метод определения оппонента"""
         self.opponent = opponent
 
@@ -73,23 +76,24 @@ class PlayerDefault(PlayerAbstract):
         """Метод нанесения урона в значительном диапазоне"""
         damage = random.randint(big_range_min, big_range_max)
         self.opponent.get_damage(damage)
-        print(f"{self.__str__()} damaged {self.opponent} at {damage}hp{'[CRITICAL HIT]'if damage > 30 else ''}!")
+        print(f"{self.__str__()} damaged {self.opponent} at {damage}hp{'[CRITICAL HIT]' if damage > 30 else ''}!")
 
     def heal(self) -> None:
         """Метод излечения"""
         points = random.randint(default_range_min, default_range_max)
-        self.health += points
+        self._health += points
         print(f"{self.__str__()} healed {points} hp!")
 
     @abstractmethod
-    def random_move(self):
+    def random_move(self) -> None:
         """Случайный выбор из существующих функций-ходов участника"""
         pass
 
 
 class PC(PlayerDefault):
     """Симуляция участника - ПК"""
-    def __str__(self):
+
+    def __str__(self) -> str:
         """Корректное отображение объекта в случае вывода в консоль(преобразование в строку)"""
         return "AI"
 
@@ -97,7 +101,7 @@ class PC(PlayerDefault):
         """Переопределение родительского метода случайного хода для ПК.
         Если уровень здоровья станет меньше 35 - шанс лечения повышается вдвое.
         """
-        if self.health < critical_health_value_for_pc:
+        if self._health < critical_health_value_for_pc:
             return random.choices([self.default_range_hit, self.big_range_hit, self.heal], weights=[1, 1, 2])[0]()
         else:
             return random.choices([self.default_range_hit, self.big_range_hit, self.heal], weights=[1, 1, 1])[0]()
@@ -105,6 +109,7 @@ class PC(PlayerDefault):
 
 class Player(PlayerDefault):
     """Симуляция участника - Игрок"""
+
     def __str__(self) -> str:
         return "Player"
 
@@ -113,7 +118,7 @@ class Player(PlayerDefault):
         return random.choices([self.default_range_hit, self.big_range_hit, self.heal], weights=[1, 1, 1])[0]()
 
 
-def get_players():
+def get_players() -> dict:
     """Функция определения участников игры, возвращает словарь с двумя игроками(возможно расширение)"""
     # Создание объекта-участника - ПК
     pc = PC()
